@@ -29,7 +29,7 @@ public class Main {
                     .get();
             System.out.println("Самое частое количество повторений: " + max.getKey() + " встретилось "
                     + max.getValue() + " раз");
-            System.out.println("Другие размеры:");
+            System.out.println("Другие размеры: ");
             for (Integer key : statMap.keySet()) {
                 System.out.println(" -" + key + "  (" + statMap.get(key) + " раз)");
             }
