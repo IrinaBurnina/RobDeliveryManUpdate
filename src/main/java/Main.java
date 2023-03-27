@@ -9,6 +9,19 @@ public class Main {
     public static Map<Integer, Integer> statMap = new TreeMap<>();
 
     public static void main(String[] args) {
+        Thread threadPrinter = new Thread(() -> {
+            while (!Thread.interrupted()) {
+                synchronized (statMap) {
+                    try {
+                        statMap.wait();
+                    } catch (InterruptedException e) {
+                        return;
+                    }
+                    printer();
+                }
+            }
+        });
+        threadPrinter.start();
         for (int i = 0; i < NUMBER_OF_THREADS; i++) {
             new Thread(() -> {
                 String route = generateRoute(LETTERS, LENGTH);
@@ -19,21 +32,20 @@ public class Main {
                     } else {
                         statMap.put(rotatesRight, 1);
                     }
+                    statMap.notify();
                 }
             }).start();
         }
-        synchronized (statMap) {
-            Map.Entry<Integer, Integer> max = statMap
-                    .entrySet()
-                    .stream().max(Map.Entry.comparingByValue())
-                    .get();
-            System.out.println("Самое частое количество повторений: " + max.getKey() + " встретилось "
-                    + max.getValue() + " раз");
-            System.out.println("Другие размеры: ");
-            for (Integer key : statMap.keySet()) {
-                System.out.println(" -" + key + "  (" + statMap.get(key) + " раз)");
-            }
-        }
+        threadPrinter.interrupt();
+    }
+
+    public static void printer() {
+        Map.Entry<Integer, Integer> max = statMap
+                .entrySet()
+                .stream().max(Map.Entry.comparingByValue())
+                .get();
+        System.out.println("Текущий лидер: " + max.getKey() + " встретилось "
+                + max.getValue() + " раз");
     }
 
     public static String generateRoute(String letters, int length) {
